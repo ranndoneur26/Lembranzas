@@ -254,6 +254,19 @@ body::after{
 }
 
 
+/* ============ REDUCCIÓN 15% PORTADA EN MÓVIL ============ */
+@media(max-width:680px){
+  .cover h1{
+    font-size:clamp(44px, 9.35vw, 82px) !important;
+    letter-spacing:.09em;
+    padding:0 8px;
+  }
+  .cover .tag{
+    font-size:clamp(12px, 2.8vw, 15px);
+    padding:0 12px;
+  }
+}
+
 /* ============ ESTILOS DE PÁXINAS DE FOTOGRAFÍA ============ */
 .photo-page{
   display:flex;
@@ -352,7 +365,7 @@ body[data-theme="noche"] .photo-img{
 
 <footer class="bottombar">
   <div class="progress">
-    <div class="t" id="progText">Portada</div>
+    <div class="t" id="progText">© Noa 2026</div>
     <div class="bar"><div class="fill" id="progFill"></div></div>
   </div>
 </footer>
@@ -558,7 +571,7 @@ function updateChrome(){
   const atStart=state.view==="cover";
   const atEnd=state.view==="chapter"&&state.ch===BOOK.length-1&&state.page===state.pages[state.ch].length-1;
   prev.disabled=atStart;next.disabled=atEnd;
-  if(state.view==="cover"){pt.textContent="Portada";fill.style.width="0%";}
+  if(state.view==="cover"){pt.textContent="© Noa 2026";fill.style.width="0%";}
   else if(state.view==="toc"){pt.textContent="Índice";fill.style.width="0%";}
   else{
     const g=globalIdx(),t=totalPages();
@@ -634,14 +647,13 @@ document.documentElement.style.setProperty("--fs",state.fs+"px");
 paginate();render();
 if(document.fonts&&document.fonts.ready){document.fonts.ready.then(()=>{paginate();render();});}
 
+/* Volver al inicio: salto directo e inmediato a la portada */
 document.getElementById('btnHome')?.addEventListener('click',()=>{
-  const goHome=()=>{
-    const prev=document.getElementById('btnPrev');
-    if(!prev || prev.disabled) return;
-    prev.click();
-    setTimeout(goHome,580);
-  };
-  goHome();
+  if(state.view==="cover") return;
+  state.view="cover";
+  state.ch=0;
+  state.page=0;
+  render("prev");
 });
 </script>
 </body>
