@@ -38,7 +38,7 @@ body[data-theme="sepia"]{
   --ink-soft:#7d6a4b;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%}
+html,body{height:100vh;height:100dvh}
 body{
   font-family:'EB Garamond',Georgia,serif;
   background:radial-gradient(1200px 800px at 50% -10%, #241d12, var(--bg) 70%);
@@ -46,6 +46,16 @@ body{
   overflow:hidden;
   display:flex;flex-direction:column;
   transition:background .5s;
+}
+/* accesibilidad: foco visible para navegación por teclado */
+:focus{outline:none}
+:focus-visible{
+  outline:2px solid var(--gold-2);
+  outline-offset:2px;
+  border-radius:4px;
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}
 }
 /* grain */
 body::after{
@@ -56,7 +66,8 @@ body::after{
 /* ---------- TOP BAR ---------- */
 .topbar{
   display:flex;align-items:center;justify-content:space-between;gap:12px;
-  padding:14px clamp(14px,3vw,32px);
+  flex-wrap:wrap;
+  padding:calc(14px + env(safe-area-inset-top)) clamp(14px,3vw,32px) 14px;
   color:var(--gold-2);
   z-index:20;position:relative;
 }
@@ -82,8 +93,9 @@ body::after{
 .btn:active{transform:scale(.95)}
 .btn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .font-size{display:flex;align-items:center;gap:2px;background:rgba(201,162,90,.08);border:1px solid rgba(201,162,90,.35);border-radius:8px;padding:2px}
-.font-size button{background:transparent;border:none;color:var(--gold-2);width:36px;height:36px;border-radius:6px;cursor:pointer;font-family:'Cormorant Garamond',serif;font-weight:700;transition:.2s}
+.font-size button{background:transparent;border:none;color:var(--gold-2);width:38px;height:38px;border-radius:6px;cursor:pointer;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:16px;transition:.2s}
 .font-size button:hover{background:rgba(201,162,90,.25)}
+.font-size button:active{transform:scale(.92)}
 .font-size .val{min-width:34px;text-align:center;font-size:13px;color:var(--gold-2);font-variant-numeric:tabular-nums}
 
 /* ---------- STAGE ---------- */
@@ -115,7 +127,9 @@ body::after{
   overflow:hidden;
   transform-origin:left center;
   backface-visibility:hidden;
+  transition:background .45s ease;
 }
+.content,.page-head,.toc-wrap,.chapter-open h2,.toc-title h2{transition:color .45s ease,border-color .45s ease}
 .page::before{ /* spine shading */
   content:"";position:absolute;left:0;top:0;bottom:0;width:34px;pointer-events:none;
   background:linear-gradient(90deg,rgba(0,0,0,.28),rgba(0,0,0,.08) 45%,transparent);
@@ -192,6 +206,24 @@ body::after{
 .cover .tag{font-style:italic;color:rgba(230,200,138,.75);font-size:clamp(14px,2.4vw,18px);margin-top:clamp(14px,3vh,24px);max-width:80%}
 .cover .meta{margin-top:clamp(20px,4vh,36px);font-size:clamp(10px,1.8vw,12px);letter-spacing:.35em;text-transform:uppercase;color:rgba(230,200,138,.55)}
 .cover .cta{margin-top:clamp(18px,4vh,34px)}
+.cta-primary{
+  background:linear-gradient(135deg,rgba(201,162,90,.22),rgba(230,200,138,.12));
+  border:1px solid var(--gold);
+  color:var(--gold-2);
+  font-family:'Cormorant Garamond',serif;font-weight:600;font-size:16px;
+  letter-spacing:.08em;
+  padding:0 clamp(24px,5vw,34px);height:clamp(46px,7vh,52px);
+  border-radius:999px;
+  cursor:pointer;
+  box-shadow:0 8px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08);
+  transition:.25s;
+}
+.cta-primary:hover{
+  background:linear-gradient(135deg,rgba(201,162,90,.35),rgba(230,200,138,.2));
+  transform:translateY(-2px);
+  box-shadow:0 12px 30px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.12);
+}
+.cta-primary:active{transform:translateY(0) scale(.97)}
 
 /* ---------- TOC ---------- */
 .toc-wrap{position:absolute;inset:0;background:linear-gradient(120deg,var(--paper),var(--paper-2));border-radius:4px 14px 14px 4px;
@@ -240,17 +272,31 @@ body::after{
 .hint{font-size:12px;font-style:italic;color:rgba(230,200,138,.5);letter-spacing:.06em;text-align:center;padding-bottom:6px}
 
 @media(max-width:680px){
-  .topbar{padding:10px 12px}
+  .topbar{padding:calc(10px + env(safe-area-inset-top)) 12px 10px;row-gap:8px}
   .brand span{display:none}
-  .home-link{font-size:12px}
-  .btn{height:38px;min-width:38px}
-  .font-size button{width:32px;height:32px}
-  .page-inner{padding:18px 20px 12px 30px}
+  .home-link{font-size:12px;padding:8px 4px}
+  .btn{height:40px;min-width:40px}
+  .font-size button{width:36px;height:36px}
+  .page-inner{padding:18px 18px 12px 26px}
   .content{text-align:left}
-  .navbtn{width:42px;height:42px}
+  .navbtn{width:44px;height:44px}
   .navbtn svg{width:20px;height:20px}
   .hint{display:none}
   .progress{min-width:140px}
+}
+
+/* Teléfonos muy pequeños (<380px de ancho) */
+@media(max-width:380px){
+  .brand b{font-size:15px;letter-spacing:.1em}
+  .home-link{font-size:11px}
+  .controls{gap:6px}
+  .btn{height:38px;min-width:38px;padding:0 8px}
+  .font-size button{width:32px;height:32px;font-size:14px}
+  .font-size .val{min-width:26px;font-size:12px}
+  .page-inner{padding:16px 14px 10px 22px}
+  .navbtn{width:38px;height:38px}
+  .navbtn.prev{left:4px}
+  .navbtn.next{right:4px}
 }
 
 
@@ -341,15 +387,15 @@ body[data-theme="noche"] .photo-img{
 
 <header class="topbar">
   <div class="brand"><b>Lembranzas</b><span>Primavera · Anos 90</span></div>
-  <button class="home-link" id="btnHome" title="Volver al inicio">Volver al inicio</button>
+  <button class="home-link" id="btnHome" title="Volver al inicio" aria-label="Volver al inicio">Volver al inicio</button>
   <div class="controls">
-    <button class="btn" id="btnToc" title="Índice"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button>
+    <button class="btn" id="btnToc" title="Índice" aria-label="Abrir índice"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button>
     <div class="font-size">
-      <button id="fsDown" title="Reducir letra">A−</button>
+      <button id="fsDown" title="Reducir letra" aria-label="Reducir tamaño de letra">A−</button>
       <span class="val" id="fsVal">19</span>
-      <button id="fsUp" title="Aumentar letra">A+</button>
+      <button id="fsUp" title="Aumentar letra" aria-label="Aumentar tamaño de letra">A+</button>
     </div>
-    <button class="btn" id="btnTheme" title="Cambiar tema"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg></button>
+    <button class="btn" id="btnTheme" title="Cambiar tema" aria-label="Cambiar tema de color"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg></button>
   </div>
 </header>
 
@@ -359,8 +405,8 @@ body[data-theme="noche"] .photo-img{
       <div class="page-inner" id="pageInner"></div>
     </div>
   </div>
-  <button class="navbtn prev" id="btnPrev" title="Anterior"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
-  <button class="navbtn next" id="btnNext" title="Siguiente"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+  <button class="navbtn prev" id="btnPrev" title="Anterior" aria-label="Página anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <button class="navbtn next" id="btnNext" title="Siguiente" aria-label="Página siguiente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
 </main>
 
 <footer class="bottombar">
@@ -501,7 +547,7 @@ function renderCover(){
     <h1>Lembranzas</h1>
     <div class="tag">Memorias dunha nena do Morrazo,<br>entre Seixo, O Campo e Aguete</div>
     <div class="meta">Noa · Quince capítulos · Un epílogo</div>
-    <div class="cta"><button class="btn" id="openBook" style="padding:0 26px;height:48px">Abrir o libro ❧</button></div>
+    <div class="cta"><button class="cta-primary" id="openBook">Abrir o libro ❧</button></div>
     <div class="bot-orn" style="margin-top:clamp(18px,4vh,34px)">✦</div>
   </div>`;
   document.getElementById("openBook").onclick=()=>{state.view="toc";render("next");};
@@ -529,7 +575,7 @@ function renderChapter(){
   const head=document.createElement("div");head.className="page-head";
   const lab=state.ch<15?"Capítulo "+ROMAN[state.ch]:"Epílogo";
   head.innerHTML=`<span>Lembranzas</span><span class="orn">✦</span><span>${lab} — ${ch.t}</span>`;
-  const cont=document.createElement("div");cont.className="content";
+  const cont=document.createElement("div");cont.className="content";cont.lang="gl";
 
   // Check if this page is a photo page
   if(pg.length===1 && ch.p[pg[0]].startsWith("foto|")){
