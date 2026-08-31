@@ -665,30 +665,38 @@ html, body {
   position: fixed;
   bottom: 4.5rem;
   right: 2rem;
-  background: var(--ui-surface);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  background: linear-gradient(165deg, var(--ui-surface), rgba(0,0,0,0.02));
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
   border: 1px solid var(--border-active);
   border-radius: 999px;
-  padding: 0.4rem 0.75rem;
+  padding: 0.45rem 0.5rem 0.45rem 0.9rem;
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  box-shadow: 0 16px 36px rgba(0,0,0,0.28);
+  gap: 0.65rem;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.08) inset;
   z-index: 50;
-  transition: all var(--transition-smooth);
+  transform-origin: bottom right;
+  transition: transform 0.32s cubic-bezier(0.34, 1.3, 0.4, 1), opacity 0.22s ease;
+}
+
+.voice-dock.is-collapsed {
+  transform: scale(0.4) translateY(12px);
+  opacity: 0;
+  pointer-events: none;
 }
 
 .voice-badge {
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
-  background: var(--english-green);
+  letter-spacing: 0.12em;
+  background: linear-gradient(135deg, var(--english-green), color-mix(in srgb, var(--english-green) 70%, #000));
   color: #fff;
-  padding: 0.25rem 0.55rem;
+  padding: 0.3rem 0.6rem;
   border-radius: 999px;
   text-transform: uppercase;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
 }
 
 .voice-btn {
@@ -702,12 +710,17 @@ html, body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background var(--transition-fast);
+  transition: background var(--transition-fast), transform 0.15s ease;
 }
 
 .voice-btn:hover {
   background: var(--accent-gold-glow);
   color: var(--english-green);
+  transform: scale(1.08);
+}
+
+.voice-btn:active {
+  transform: scale(0.94);
 }
 
 .voice-btn svg {
@@ -726,6 +739,86 @@ html, body {
   border-radius: var(--radius-sm);
   outline: none;
   cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.voice-select-rate:hover {
+  border-color: var(--english-green);
+}
+
+.voice-dock-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border-subtle);
+}
+
+.voice-btn-close {
+  background: transparent;
+  border: none;
+  color: var(--ink-muted);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.voice-btn-close:hover {
+  background: rgba(180, 40, 40, 0.12);
+  color: #b42828;
+}
+
+.voice-btn-close svg {
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* Recall pill shown when the voice dock has been dismissed */
+.voice-recall {
+  position: fixed;
+  bottom: 4.5rem;
+  right: 2rem;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(165deg, var(--ui-surface), rgba(0,0,0,0.02));
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid var(--border-active);
+  color: var(--english-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 50;
+  box-shadow: 0 14px 32px rgba(0,0,0,0.28);
+  transform: scale(0);
+  opacity: 0;
+  transition: transform 0.32s cubic-bezier(0.34, 1.3, 0.4, 1), opacity 0.22s ease, background var(--transition-fast);
+  pointer-events: none;
+}
+
+.voice-recall.is-visible {
+  transform: scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.voice-recall:hover {
+  background: var(--accent-gold-glow);
+}
+
+.voice-recall svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
 }
 
 /* ==========================================================================
@@ -949,7 +1042,15 @@ html, body {
       <option value="1.0">1.15× (Fluída)</option>
       <option value="1.15">1.3× (Rápida)</option>
     </select>
+    <span class="voice-dock-divider"></span>
+    <button class="voice-btn-close" id="btnVoiceHide" title="Ocultar controis de voz" aria-label="Ocultar controis de voz">
+      <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
   </aside>
+
+  <button class="voice-recall" id="btnVoiceRecall" title="Amosar controis de voz" aria-label="Amosar controis de voz">
+    <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+  </button>
 
   <!-- Bottom Navigation & Progress -->
   <footer class="bottombar">
@@ -987,7 +1088,8 @@ const appState = {
   themeIndex: 0,
   pagesLayout: [],
   isTTSPlaying: false,
-  ttsCurrentParaIdx: -1
+  ttsCurrentParaIdx: -1,
+  voiceDockHidden: false
 };
 
 const dom = {
@@ -1004,10 +1106,13 @@ const dom = {
   btnThemeToggle: document.getElementById('btnThemeToggle'),
   btnExportPdf: document.getElementById('btnExportPdf'),
   btnBrandHome: document.getElementById('btnBrandHome'),
+  voiceDock: document.getElementById('voiceDock'),
   btnVoicePlay: document.getElementById('btnVoicePlay'),
   btnVoiceStop: document.getElementById('btnVoiceStop'),
   voicePlayIcon: document.getElementById('voicePlayIcon'),
   voiceRateSelect: document.getElementById('voiceRateSelect'),
+  btnVoiceHide: document.getElementById('btnVoiceHide'),
+  btnVoiceRecall: document.getElementById('btnVoiceRecall'),
   progressLocation: document.getElementById('progressLocation'),
   progressPercentage: document.getElementById('progressPercentage'),
   progressBar: document.getElementById('progressBar'),
@@ -1024,7 +1129,8 @@ function saveState() {
       c: appState.chapterIdx,
       p: appState.pageIdx,
       f: appState.fontSize,
-      t: appState.themeIndex
+      t: appState.themeIndex,
+      vh: appState.voiceDockHidden
     };
     localStorage.setItem('lembranzas_luxury_state_v3', JSON.stringify(data));
   } catch(e){}
@@ -1036,6 +1142,7 @@ function loadState() {
     if (saved) {
       appState.fontSize = saved.f || 19;
       appState.themeIndex = (typeof saved.t === 'number') ? saved.t : 0;
+      appState.voiceDockHidden = !!saved.vh;
       if (saved.v && (saved.v === 'cover' || saved.v === 'toc' || saved.v === 'chapter')) {
         appState.view = saved.v;
         appState.chapterIdx = (typeof saved.c === 'number') ? saved.c : 0;
@@ -1742,6 +1849,8 @@ function setupEvents() {
 
   if (dom.btnVoicePlay) dom.btnVoicePlay.onclick = playTTS;
   if (dom.btnVoiceStop) dom.btnVoiceStop.onclick = stopTTS;
+  if (dom.btnVoiceHide) dom.btnVoiceHide.onclick = hideVoiceDock;
+  if (dom.btnVoiceRecall) dom.btnVoiceRecall.onclick = showVoiceDock;
   if (dom.btnExportPdf) dom.btnExportPdf.onclick = exportFullBookPDF;
 
   // Keyboard Navigation
@@ -1814,6 +1923,30 @@ function applyTheme() {
   document.documentElement.setAttribute('data-theme', THEMES[appState.themeIndex]);
 }
 
+function applyVoiceDockVisibility() {
+  if (!dom.voiceDock) return;
+  const hidden = !!appState.voiceDockHidden;
+  dom.voiceDock.classList.toggle('is-collapsed', hidden);
+  dom.voiceDock.setAttribute('aria-hidden', hidden ? 'true' : 'false');
+  if (dom.btnVoiceRecall) {
+    dom.btnVoiceRecall.classList.toggle('is-visible', hidden);
+  }
+}
+
+function hideVoiceDock() {
+  // Stop any lectura en curso para non deixar audio "fantasma" cando se agocha o dock
+  if (typeof stopTTS === 'function') stopTTS();
+  appState.voiceDockHidden = true;
+  applyVoiceDockVisibility();
+  saveState();
+}
+
+function showVoiceDock() {
+  appState.voiceDockHidden = false;
+  applyVoiceDockVisibility();
+  saveState();
+}
+
 /* ==========================================================================
    APP STARTUP
    ========================================================================== */
@@ -1822,6 +1955,7 @@ function init() {
   applyTheme();
   document.documentElement.style.setProperty('--fs', appState.fontSize + 'px');
   initVoices();
+  applyVoiceDockVisibility();
   setupEvents();
 
   calculatePagination();
